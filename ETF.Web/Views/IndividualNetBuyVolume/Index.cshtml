@@ -1,0 +1,18 @@
+﻿@model List<IndiInstiTradingDataViewModel>
+@{
+    ViewData["Title"] = "Individual Net Buy Volume";
+}
+@{
+    var myChart = new Chart(width: 600, height: 400)
+                                .AddTitle("Today Net Buy Volume")
+                                                .AddSeries("Default",
+                            xValue: Model, xField: "Ticker",
+                            yValues: Model, yFields: "NetVolume");
+
+}
+
+<div id="homePage" class="text-center text-capitalize  text-black">
+    <h1 class="display-4">Today's Net Buy Volume Of ETFs</h1>
+</div>
+</br>
+<div>@myChart.Write()</div>
