@@ -9,7 +9,7 @@ public static class HostingExtensions
         builder.Services.AddHttpClient(name: "CapitalMarketDataWebApi",
             configureClient: options =>
             {
-                options.BaseAddress = new Uri("http://localhost:5276");
+                options.BaseAddress = new Uri("http://localhost:5000");
                 options.DefaultRequestHeaders.Accept.Add(
                    new MediaTypeWithQualityHeaderValue(mediaType: "application/json", quality: 1.0));
             });

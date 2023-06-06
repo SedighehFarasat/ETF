@@ -3,16 +3,66 @@
     ViewData["Title"] = "Individual Net Buy Volume";
 }
 @{
-    var myChart = new Chart(width: 600, height: 400)
-                                .AddTitle("Today Net Buy Volume")
-                                                .AddSeries("Default",
-                            xValue: Model, xField: "Ticker",
-                            yValues: Model, yFields: "NetVolume");
-
+    var XLabels = Newtonsoft.Json.JsonConvert.SerializeObject(Model.Select(x => x.Ticker).ToList());
+    var YValues = Newtonsoft.Json.JsonConvert.SerializeObject(Model.Select(x => x.NetVolume).ToList());
 }
 
 <div id="homePage" class="text-center text-capitalize  text-black">
     <h1 class="display-4">Today's Net Buy Volume Of ETFs</h1>
 </div>
 </br>
-<div>@myChart.Write()</div>
+<div class="chart-container">
+    <canvas id="chart" style="width:100%; height:500px"></canvas>
+</div>
+
+<!-- https: //www.c-sharpcorner.com/article/creating-charts-with-asp-net-core/ -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.bundle.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+
+<script type="text/javascript">
+    $(function () {
+        var chartName = "chart";
+        var ctx = document.getElementById(chartName).getContext('2d');
+        var data = {
+            labels: @Html.Raw(XLabels),
+            datasets: [{
+                label: "#Net Buy Volume",
+                backgroundColor: 'rgba(94,114,186)',
+                borderColor: 'rgba(94,114,186)',
+                borderWidth: 1,
+                data: @Html.Raw(YValues)
+        }]
+        };
+
+        var options = {
+            maintainAspectRatio: false,
+            scales: {
+                yAxes: [{
+                    ticks: {
+                        min: 0,
+                        beginAtZero: true
+                    },
+                    gridLines: {
+                        display: true,
+                        color: "rgba(255,99,164,0.2)"
+                    }
+                }],
+                xAxes: [{
+                    ticks: {
+                        min: 0,
+                        beginAtZero: true
+                    },
+                    gridLines: {
+                        display: false
+                    }
+                }]
+            }
+        };
+
+        var myChart = new Chart(ctx, {
+            options: options,
+            data: data,
+            type: 'bar'
+        });
+    });
+</script>

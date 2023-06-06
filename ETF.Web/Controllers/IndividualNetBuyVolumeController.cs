@@ -2,6 +2,7 @@
 using EtfAnalyzer.Web.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
+using System.Text.RegularExpressions;
 
 namespace EtfAnalyzer.Web.Controllers
 {
@@ -17,6 +18,7 @@ namespace EtfAnalyzer.Web.Controllers
         public async Task<IActionResult> Index()
         {
             List<IndiInstiTradingDataViewModel> modelList = new();
+            Regex pattern = new("^.*\\d$");
             HttpClient client = _clientFactory.CreateClient(name: "CapitalMarketDataWebApi");
 
             HttpRequestMessage etfListRequest = new(HttpMethod.Get, $"api/v1/Instrument/Etfs");
@@ -26,18 +28,21 @@ namespace EtfAnalyzer.Web.Controllers
 
             foreach (var etf in etfs)
             {
-                HttpRequestMessage instiIndiRequest = new(HttpMethod.Get, $"api/v1/IndividualInstitutionalTradingData/{etf.Id}");
-                HttpResponseMessage instiIndiResponse = await client.SendAsync(instiIndiRequest);
-                var data = await instiIndiResponse.Content.ReadFromJsonAsync<IndiInstiTradingData>();
-                if (data is not null)
+                if (!pattern.IsMatch(etf.Ticker) && etf.Type == "Etf" && etf.Subsector == "FixedIncomeEtf")
                 {
-                    IndiInstiTradingDataViewModel model = new()
+                    HttpRequestMessage instiIndiRequest = new(HttpMethod.Get, $"api/v1/IndividualInstitutionalTradingData/{etf.Id}");
+                    HttpResponseMessage instiIndiResponse = await client.SendAsync(instiIndiRequest);
+                    var data = await instiIndiResponse.Content.ReadFromJsonAsync<IndiInstiTradingData>();
+                    if (data is not null)
                     {
-                        Ticker = etf.Ticker,
-                        Date = DateTime.Now,
-                        NetVolume = data.IndividualTradingVolume_BuySide - data.IndividualTradingVolume_SellSide,
-                    };
-                    modelList.Add(model);
+                        IndiInstiTradingDataViewModel model = new()
+                        {
+                            Ticker = etf.Ticker,
+                            Date = DateTime.Now,
+                            NetVolume = data.IndividualTradingVolume_BuySide - data.IndividualTradingVolume_SellSide,
+                        };
+                        modelList.Add(model);
+                    }
                 }
             }
 
